@@ -39,7 +39,7 @@ services:
   webapp:
     container_name: webapp
     build:
-      context: .
+      context: ./webapp/
       dockerfile: ./Dockerfile
     environment:
       DATABASE_URL: ${DATABASE_URL}

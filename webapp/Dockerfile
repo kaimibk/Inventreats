@@ -21,8 +21,8 @@ RUN set -ex \
 # COPY requirements/ /requirements/
 
 RUN mkdir /app/
-WORKDIR /app/
-COPY ./webapp /app/
+COPY . /app
+WORKDIR /app/inventreats/
 
 RUN set -ex \
     && BUILD_DEPS=" \
@@ -37,7 +37,7 @@ RUN set -ex \
     && apt-get update && apt-get install -y --no-install-recommends $BUILD_DEPS \
     && python3.8 -m venv /venv \
     && /venv/bin/pip install -U pip \
-    && /venv/bin/pip install --no-cache-dir -r requirements/prod.txt \
+    && /venv/bin/pip install --no-cache-dir -r /app/requirements/dev.txt \
     && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $BUILD_DEPS \
     && rm -rf /var/lib/apt/lists/*
 
