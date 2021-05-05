@@ -1,0 +1,62 @@
+version: "3.8"
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:9.6
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    restart: unless-stopped
+    expose:
+      - "5432"
+  redis:
+    container_name: redis
+    image: redis:3.0
+    restart: always
+    expose:
+      - "6379"
+  elasticsearch:
+    image: elasticsearch:7.10.1
+    container_name: es01
+    restart: unless-stopped
+    environment:
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    cap_add:
+      - IPC_LOCK
+    # volumes:
+    #   - elasticsearch-data:/usr/share/elasticsearch/data
+    expose:
+      - "9200"
+  webapp:
+    container_name: webapp
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      CACHE_URL: redis://redis
+    volumes:
+      - ./media-root:/app/media
+      - .env:/app/.env
+    links:
+      - postgres:postgres
+      - redis:redis
+      - elasticsearch:elasticsearch
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - redis
+      - elasticsearch
+volumes:
+  media-root:
